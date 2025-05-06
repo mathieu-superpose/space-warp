@@ -36,7 +36,7 @@ function StarSystem() {
 
   const temp = useMemo(() => new THREE.Matrix4(), [])
   const tempPos = useMemo(() => new THREE.Vector3(), [])
-  //   const tempScale = useMemo(() => new THREE.Vector3(1, 1, 1), [])
+  const tempScale = useMemo(() => new THREE.Vector3(1, 1, 1), [])
   const tempObject = useMemo(() => new THREE.Object3D(), [])
   const tempColor = useMemo(() => new THREE.Color(), [])
 
@@ -60,7 +60,7 @@ function StarSystem() {
     stars.instanceMatrix.needsUpdate = true
     clock.start()
 
-    // restart the clock on click
+    // restart the clock on click to reset the animation and accelerate the stars
     const handleClick = () => {
       clock.elapsedTime = 0
     }
@@ -86,7 +86,7 @@ function StarSystem() {
       stars.getMatrixAt(i, temp)
 
       // update scale
-      tempObject.scale.set(1, 1, Math.max(1, Math.pow(0.5, elapsedTime) * 10))
+      tempScale.set(1, 1, Math.max(1, Math.pow(0.5, elapsedTime) * 10))
 
       // update position
       tempPos.setFromMatrixPosition(temp)
@@ -106,8 +106,12 @@ function StarSystem() {
         tempPos.z += Math.max(delta, Math.pow(0.5, elapsedTime))
       }
 
+      // apply the new position and scale
       tempObject.position.set(tempPos.x, tempPos.y, tempPos.z)
+      tempObject.scale.set(tempScale.x, tempScale.y, tempScale.z)
       tempObject.updateMatrix()
+
+      // set the new matrix
       stars.setMatrixAt(i, tempObject.matrix)
     }
 
