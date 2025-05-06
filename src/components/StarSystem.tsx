@@ -3,20 +3,36 @@ import * as THREE from "three"
 
 import { generatePos } from "../utils/stars"
 import { useFrame } from "@react-three/fiber"
+import {
+  Bloom,
+  ChromaticAberration,
+  EffectComposer,
+} from "@react-three/postprocessing"
+import { BlendFunction, ChromaticAberrationEffect } from "postprocessing"
 
 const STAR_COUNT = 100
+const CHROMATIC_ABBERATION_OFFSET = 0.003
 
 function StarSystem() {
   const starsRef = useRef<THREE.InstancedMesh>(null)
+  const effectsRef = useRef<ChromaticAberrationEffect>(null)
+  const clock = useMemo(() => new THREE.Clock(), [])
 
   const starGeometry = useMemo(
     () => new THREE.BoxGeometry(0.05, 0.05, 0.05),
     []
   )
-  const starMaterial = useMemo(
-    () => new THREE.MeshBasicMaterial({ color: 0xffffff }),
-    []
-  )
+  const starMaterial = useMemo(() => {
+    const material = new THREE.MeshBasicMaterial()
+    const color = new THREE.Color()
+    color.r = 1.5
+    color.g = 1.5
+    color.b = 1.5
+    material.color = color
+
+    material.toneMapped = false
+    return material
+  }, [])
 
   const temp = useMemo(() => new THREE.Matrix4(), [])
   const tempPos = useMemo(() => new THREE.Vector3(), [])
@@ -42,9 +58,23 @@ function StarSystem() {
     }
 
     stars.instanceMatrix.needsUpdate = true
+    clock.start()
+
+    // restart the clock on click
+    const handleClick = () => {
+      clock.elapsedTime = 0
+    }
+
+    // change the cursor to a pointer
+    document.body.style.cursor = "pointer"
+
+    window.addEventListener("click", handleClick)
+    return () => {
+      window.removeEventListener("click", handleClick)
+    }
   }, [])
 
-  useFrame(({ clock }, delta) => {
+  useFrame((_state, delta) => {
     if (!starsRef?.current) {
       return
     }
@@ -83,15 +113,41 @@ function StarSystem() {
 
     stars.instanceMatrix.needsUpdate = true
     if (stars.instanceColor) stars.instanceColor.needsUpdate = true
+
+    // update post processing uniforms
+    if (!effectsRef.current) return
+
+    // check type of effectsRef
+    effectsRef.current.offset.x = Math.max(
+      0,
+      Math.pow(0.5, elapsedTime) * CHROMATIC_ABBERATION_OFFSET
+    )
+    effectsRef.current.offset.y = Math.max(
+      0,
+      Math.pow(0.5, elapsedTime) * CHROMATIC_ABBERATION_OFFSET
+    )
   })
 
   return (
-    <group>
+    <>
       <instancedMesh
         ref={starsRef}
         args={[starGeometry, starMaterial, STAR_COUNT]}
       />
-    </group>
+      <EffectComposer>
+        <Bloom luminanceThreshold={0.2} mipmapBlur />
+        <ChromaticAberration
+          ref={effectsRef}
+          blendFunction={BlendFunction.NORMAL}
+          offset={
+            new THREE.Vector2(
+              CHROMATIC_ABBERATION_OFFSET,
+              CHROMATIC_ABBERATION_OFFSET
+            )
+          }
+        />
+      </EffectComposer>
+    </>
   )
 }
 
