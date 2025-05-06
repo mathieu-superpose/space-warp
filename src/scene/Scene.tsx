@@ -1,5 +1,7 @@
-import Environment from "../components/Environment"
 import { OrbitControls } from "@react-three/drei"
+
+import Environment from "../components/Environment"
+import StarSystem from "../components/StarSystem"
 
 function Scene() {
   return (
@@ -7,10 +9,7 @@ function Scene() {
       <Environment />
       <OrbitControls />
 
-      <mesh>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="orange" />
-      </mesh>
+      <StarSystem />
     </>
   )
 }
