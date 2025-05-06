@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useRef } from "react"
 import * as THREE from "three"
-
-import { generatePos } from "../utils/stars"
 import { useFrame } from "@react-three/fiber"
 import {
   Bloom,
@@ -9,6 +7,8 @@ import {
   EffectComposer,
 } from "@react-three/postprocessing"
 import { BlendFunction, ChromaticAberrationEffect } from "postprocessing"
+
+import { generatePos } from "../utils/stars"
 
 const STAR_COUNT = 100
 const CHROMATIC_ABBERATION_OFFSET = 0.003
