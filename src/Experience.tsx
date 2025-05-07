@@ -13,6 +13,7 @@ function Experience() {
           near: 0.1,
           far: 200,
         }}
+        dpr={[0.5, 1]}
       >
         <Scene />
       </Canvas>
